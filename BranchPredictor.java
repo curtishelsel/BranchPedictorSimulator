@@ -16,6 +16,8 @@ public class BranchPredictor{
 	private int n;
 	private int[] table;
 	private int gbhRegister;
+	private int miss;
+	private int total;
 
 	public BranchPredictor(int m, int n, String fileName){
 
@@ -35,6 +37,7 @@ public class BranchPredictor{
 				BranchInstruction bi = new BranchInstruction(address, outcome);
 
 				simulate(bi);
+				total++;
 			}
 		
 		}
@@ -45,18 +48,34 @@ public class BranchPredictor{
 
 	private void simulate(BranchInstruction bi){
 	
-		int offset = bi.getAddressM(m) ^ (int)(gbhRegister * Math.pow(2, m-n));
-		int prediction = table[offset];
-
-		System.out.println(offset);
+		int offset = bi.getAddressM(m) ^ (gbhRegister * (int)Math.pow(2, m-n));
+		int prediction = table[offset] / 2;
 	
+	
+		if(prediction != bi.getOutcome()){
+			miss++;
+		}
+			
+		gbhRegister = gbhRegister >> 1;
+		
+		if(bi.getOutcome() == 1){
+			if(table[offset] < 3){
+				table[offset]++;
+			}
+			gbhRegister += (int) Math.pow(2,n-1);
+		}
+		else{
+			if(table[offset] > 0){
+				table[offset]--;
+			}
+		}
+
+
 	}
 	
 	
-	
 	private void printStatistics(){
-	
-	
+		System.out.printf("%d %d %.2f%% \n",m , n, ((double) miss / total) * 100);
 	}
 	
 	public static void main(String[] args){
@@ -73,18 +92,4 @@ public class BranchPredictor{
 	
 		bp.printStatistics();
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
