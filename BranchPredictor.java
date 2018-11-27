@@ -31,12 +31,25 @@ public class BranchPredictor{
 			while(in.hasNext()){
 				String address = in.next();
 				String outcome = in.next();
+				
+				BranchInstruction bi = new BranchInstruction(address, outcome);
+
+				simulate(bi);
 			}
 		
 		}
 		catch(FileNotFoundException ex){
 			System.out.println(ex.toString());		
 		}
+	}
+
+	private void simulate(BranchInstruction bi){
+	
+		int offset = bi.getAddressM(m) ^ (int)(gbhRegister * Math.pow(2, m-n));
+		int prediction = table[offset];
+
+		System.out.println(offset);
+	
 	}
 	
 	
