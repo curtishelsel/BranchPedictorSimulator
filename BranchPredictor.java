@@ -12,20 +12,17 @@ import java.io.File;
 
 public class BranchPredictor{
 	
-	private int m;
-	private int n;
-	private int[] table;
-	private int gbhRegister;
-	private int miss;
-	private int total;
+	private int m, n, miss, total, gbhRegister;
+	private int[] predictionTable;
 
 	public BranchPredictor(int m, int n, String fileName){
 
 		this.m = m;
 		this.n = n;
 
-		table = new int[(int) Math.pow(2,m)];
-		Arrays.fill(table, 2);
+		// Set prediction table initial values to weakly taken
+		predictionTable = new int[(int) Math.pow(2,m)];
+		Arrays.fill(predictionTable, 2);
 
 		try{
 			Scanner in = new Scanner(new File(fileName));
@@ -48,9 +45,8 @@ public class BranchPredictor{
 
 	private void simulate(BranchInstruction bi){
 	
-		int offset = bi.getAddressM(m) ^ (gbhRegister * (int)Math.pow(2, m-n));
-		int prediction = table[offset] / 2;
-	
+		int index = bi.getAddressM(m) ^ (gbhRegister * (int)Math.pow(2, m-n));
+		int prediction = predictionTable[index] / 2;
 	
 		if(prediction != bi.getOutcome()){
 			miss++;
@@ -59,20 +55,16 @@ public class BranchPredictor{
 		gbhRegister = gbhRegister >> 1;
 		
 		if(bi.getOutcome() == 1){
-			if(table[offset] < 3){
-				table[offset]++;
+			if(predictionTable[index] < 3){
+				predictionTable[index]++;
 			}
 			gbhRegister += (int) Math.pow(2,n-1);
 		}
 		else{
-			if(table[offset] > 0){
-				table[offset]--;
-			}
+			if(predictionTable[index] > 0)
+				predictionTable[index]--;
 		}
-
-
 	}
-	
 	
 	private void printStatistics(){
 		System.out.printf("%d %d %.2f%% \n",m , n, ((double) miss / total) * 100);
