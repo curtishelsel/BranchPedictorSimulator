@@ -45,21 +45,29 @@ public class BranchPredictor{
 
 	private void simulate(BranchInstruction bi){
 	
+		// index of table is the branch address M value xor with the gbhRegister value
 		int index = bi.getAddressM(m) ^ (gbhRegister * (int)Math.pow(2, m-n));
+
+		// Changes values 0-3 to either 0 or 1 for not taken or taken, respectively
 		int prediction = predictionTable[index] / 2;
 	
+		// If the prediction is wrong, increment the number of misses
 		if(prediction != bi.getOutcome()){
 			miss++;
 		}
-			
+		
+		// Every iteration will shift in the next outcome into the gbhRegister
 		gbhRegister = gbhRegister >> 1;
 		
+		// If the outcome is taken, increment prediction value
 		if(bi.getOutcome() == 1){
 			if(predictionTable[index] < 3){
 				predictionTable[index]++;
 			}
+			// Add 1 to the beginning of the gbhRegister
 			gbhRegister += (int) Math.pow(2,n-1);
 		}
+		// If the outcome is not taken, decrement the prediction value
 		else{
 			if(predictionTable[index] > 0)
 				predictionTable[index]--;
